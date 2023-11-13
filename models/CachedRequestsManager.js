@@ -13,12 +13,12 @@ export default class CachedRequestsManager{
             if(ETag == "") {
                 ETag = v4(); // generate ETag
             }
-            let req = {url,content,ETag,TTL: utilities.nowInSeconds() + repositoryCachesExpirationTime};
+            let req = {content,ETag,TTL: utilities.nowInSeconds() + repositoryCachesExpirationTime,url};
             cache.push(req);
-            console.log("SUCCES: CachedRequestsManager.add(), url: " + url + ", added to cache. TTL: " + req.TTL + ".");
+            log("SUCCES: CachedRequestsManager.add(), url: " + url + ", added to cache. TTL: " + req.TTL + ".");
         }
         else{//error: url empty or undefined
-            console.log("ERROR: CachedRequestsManager.add(), url empty or undefined.");
+            log("ERROR: CachedRequestsManager.add(), url empty or undefined.");
         }
     }
     static find(url = "") { //pas oublier de verifier ETag
@@ -26,30 +26,30 @@ export default class CachedRequestsManager{
             for(let req of cache) {
                 if(req.url == url) {
                     req.TTL = utilities.nowInSeconds() + repositoryCachesExpirationTime;
-                    console.log("SUCCES: CachedRequestsManager.find(), url: " + url + ", fetched from cache. new TTL: " + req.TTL + ".");
+                    log("SUCCES: CachedRequestsManager.find(), url: " + url + ", fetched from cache. new TTL: " + req.TTL + ".");
                     return req;
                 };
             }
-            console.log("ERROR: CachedRequestsManager.find(), cached url not found.");
+            log("ERROR: CachedRequestsManager.find(), cached url not found.");
         }
         else{//error: url empty or undefined
-            console.log("ERROR: CachedRequestsManager.find(), url empty or undefined.");
+            log("ERROR: CachedRequestsManager.find(), url empty or undefined.");
         }
         return undefined;
     }
     static clear(url) {
         if(url != "") {
             for(let i in cache) {
-                if(cache[i].url == url) {
-                    console.log("SUCCES: CachedRequestsManager.clear(), cached request removed.");
+                if(cache[i].url.toLowerCase().indexOf(url.toLowerCase()) > -1) {
+                    log("SUCCES: CachedRequestsManager.clear(), cached request removed.");
                     cache.splice(i, 1);
                     return;
                 }
             }
-            console.log("ERROR: CachedRequestsManager.clear(), cached request not found.");
+            log("ERROR: CachedRequestsManager.clear(), cached request not found.");
         }
         else{//error: url empty or undefined
-            console.log("ERROR: CachedRequestsManager.clear(), url empty or undefined.");
+            log("ERROR: CachedRequestsManager.clear(), url empty or undefined.");
         }
     }
     static flushExpired() {
@@ -57,11 +57,11 @@ export default class CachedRequestsManager{
         for(let i in cache) {
             if(cache[i].TTL < utilities.nowInSeconds()) {
                 expiredIndexes.push(i);
-                console.log("SUCCES: CachedRequestsManager.flushExpired(), url: " + cache[i].url + " expired, TTL: " + cache[i].TTL);
+                log("SUCCES: CachedRequestsManager.flushExpired(), url: " + cache[i].url + " expired, TTL: " + cache[i].TTL);
             }
         }
         if(expiredIndexes.length > 0) {
-        console.log("SUCCES: CachedRequestsManager.flushExpired(), deleted: " + expiredIndexes.length + ", cached requests.");
+        log("SUCCES: CachedRequestsManager.flushExpired(), deleted: " + expiredIndexes.length + ", cached requests.");
         utilities.deleteByIndex(cache,expiredIndexes);
         }
     }
@@ -69,12 +69,12 @@ export default class CachedRequestsManager{
         //HttpContext.response.JSON( paylod, ETag, true /* from cache */)
         let req = CachedRequestsManager.find(HttpContext.req.url);
         if(req != undefined) {
-            console.log("SUCCES: CachedRequestsManager.get(), url: " + req.url + ", fetched from cache.");
-            HttpContext.response.JSON(req, req.ETag, true);
+            log("SUCCES: CachedRequestsManager.get(), url: " + req.url + ", fetched from cache.");
+            HttpContext.response.JSON(req.content, req.ETag, true);
             return true;
         }
         else{
-        console.log("WARN: CachedRequestsManager.get(), url: " + HttpContext.req.url + ", not found in cache.");
+        log("WARN: CachedRequestsManager.get(), url: " + HttpContext.req.url + ", not found in cache.");
         return false;
         }
     }

@@ -4,6 +4,7 @@ import * as utilities from "../utilities.js";
 import { log } from "../log.js";
 import CollectionFilter from "./collectionFilter.js";
 import RepositoryCachesManager from "./repositoryCachesManager.js";
+import CachedRequestsManager from "./CachedRequestsManager.js";
 
 globalThis.jsonFilesPath = "jsonFiles";
 globalThis.repositoryEtags = {};
@@ -26,6 +27,7 @@ export default class Repository {
     newETag() {
         this.ETag = uuidv1();
         repositoryEtags[this.objectsName] = this.ETag;
+        CachedRequestsManager.clear(this.objectsName);
     }
     objects() {
         if (this.objectsList == null) this.read();
