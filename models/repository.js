@@ -23,11 +23,12 @@ export default class Repository {
         if (this.objectsName in repositoryEtags)
             this.ETag = repositoryEtags[this.objectsName];
         else this.newETag();
+       CachedRequestsManager.clear(this.objectsName);
     }
     newETag() {
         this.ETag = uuidv1();
         repositoryEtags[this.objectsName] = this.ETag;
-        CachedRequestsManager.clear(this.objectsName);
+       CachedRequestsManager.clear(this.objectsName);
     }
     objects() {
         if (this.objectsList == null) this.read();
